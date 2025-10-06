@@ -8,9 +8,10 @@ class SimpleVocab:
         preprocessed = re.split(r'([,.:;?_!"()\']|--|\s)', raw_text)
         preprocessed = [item.strip() for item in preprocessed if item.strip()]
 
-        all_words = sorted(set(preprocessed))
+        all_tokens = sorted(set(preprocessed))
+        all_tokens.extend(["<|endoftext|>", "<|unk|>"])
 
-        self.vocab = {token:integer for integer, token in enumerate(all_words)}
+        self.vocab = {token:integer for integer, token in enumerate(all_tokens)}
     
     def getVocab(self):
         return self.vocab
@@ -23,6 +24,8 @@ class SimpleTokenizerV1:
     def encode(self, text):
         preprocessed = re.split(r'([,.:;?_!"()\']|--|\s)', text)
         preprocessed = [item.strip() for item in preprocessed if item.strip()]
+        preprocessed = [item if item in self.str_to_int else "<|unk|>" for item in preprocessed]
+
         ids = [self.str_to_int[token] for token in preprocessed]
         return ids
 
@@ -36,7 +39,7 @@ def main():
     vocab = SimpleVocab(text_path)
     
     tokenizer = SimpleTokenizerV1(vocab.getVocab())
-    text = "Hello, do you like tea?"
+    text = "Hello, do you like tea? <|endoftext|> In the sunlit terraces of the palace."
 
     # Convert text to token IDs.
     ids = tokenizer.encode(text)
